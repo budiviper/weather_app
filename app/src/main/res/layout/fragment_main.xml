@@ -8,12 +8,16 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="weather.budi.com.weatherapps.MainActivityFragment"
-    tools:showIn="@layout/main_layout">
+    tools:context="weather.budi.com.weatherapps.MainFragment"
+    tools:showIn="@layout/main_layout"
+    android:background="@android:color/black">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!" />
+    <TextView style="@style/HomeStyle" android:id="@+id/tvCity" android:textSize="24dp" android:layout_marginTop="100dp"/>
+
+    <TextView style="@style/HomeStyle" android:id="@+id/tvWeatherInfo" android:layout_below="@id/tvCity" android:textSize="18dp"/>
+
+    <ImageView android:layout_width="60dp" android:padding="0dp" android:adjustViewBounds="true" android:layout_height="60dp" android:id="@+id/ivIcon" android:layout_below="@id/tvWeatherInfo" android:layout_centerHorizontal="true" android:scaleType="fitXY"/>
+
+    <TextView style="@style/HomeStyle" android:id="@+id/tvDegree" android:layout_below="@id/ivIcon" android:textSize="80dp"/>
 
 </RelativeLayout>
