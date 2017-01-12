@@ -1,51 +1,34 @@
-package weather.budi.com.weatherapps;
+package weather.budi.com.weatherapps.fragment;
 
-import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Criteria;
-import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationManager;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.List;
-import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import weather.budi.com.weatherapps.R;
 import weather.budi.com.weatherapps.gps.GPSTracker;
 import weather.budi.com.weatherapps.network.VolleyResultListener;
 import weather.budi.com.weatherapps.network.VolleySingleton;
 import weather.budi.com.weatherapps.utils.Constants;
 import weather.budi.com.weatherapps.utils.Popup;
-import weather.budi.com.weatherapps.utils.SnackbarUtils;
 import weather.budi.com.weatherapps.utils.StringUtils;
-import weather.budi.com.weatherapps.utils.ToastUtils;
 import weather.budi.com.weatherapps.utils.UrlComposer;
 import weather.budi.com.weatherapps.vo.WeatherModel;
-
-import static android.content.Context.LOCATION_SERVICE;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -59,6 +42,7 @@ public class MainFragment extends Fragment implements VolleyResultListener {
     ProgressDialog progress;
     WeatherModel weatherModel;
 
+    @Bind(R.id.tvVersion) TextView tvVersion;
     @Bind(R.id.tvCity) TextView tvCity;
     @Bind(R.id.tvWeatherInfo) TextView tvWeatherInfo;
     @Bind(R.id.tvDegree) TextView tvDegree;
@@ -75,8 +59,19 @@ public class MainFragment extends Fragment implements VolleyResultListener {
                 container, false);
         a = getActivity();
         ctx = getActivity();
-        a.setTitle(Constants.TITLE_HOME);
+        //a.setTitle(Constants.TITLE_HOME);
         ButterKnife.bind(this, contentView);
+
+        PackageInfo pInfo = null;
+        try {
+            pInfo = a.getPackageManager().getPackageInfo(a.getPackageName(), 0);
+            String version = pInfo.versionName;
+            tvVersion.setText("v"+version);
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
 
         progress = Popup.showProgress(getResources().getString(R.string.text_loading), a);
         progress.setCancelable(true);

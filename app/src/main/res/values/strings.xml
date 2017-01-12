@@ -2,5 +2,7 @@
     <string name="app_name">WeatherApps</string>
     <string name="action_settings">Settings</string>
 
+    <string name="title_search_place">Search Place</string>
+
     <string name="text_loading">Harap Tunggu...</string>
 </resources>

@@ -12,6 +12,11 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyBFAeamoaMOSuAwQJAd8nmIoLfcgz6Z1tQ"/>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"
@@ -22,6 +27,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".GooglePlacesAutocompleteActivity"
+            android:label="@string/title_search_place"
+            android:screenOrientation="portrait">
+        </activity>
+
     </application>
+
+
+
+
 
 </manifest>
