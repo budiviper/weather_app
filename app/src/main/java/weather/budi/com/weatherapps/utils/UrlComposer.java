@@ -14,6 +14,10 @@ public class UrlComposer {
         return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?id=" + cityId + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
+    public static String composeCurrentWeatherByPosition(double lon, double lat,  String unit){
+        return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?lat=" + lat + "&lon=" + lon + "&units=" + unit + "&APPID=" + Constants.APP_ID;
+    }
+
     public static String composeWeatherIcon(String icon){
         return Constants.BASE_URL_API + Constants.URL_IMG + icon + ".png";
     }

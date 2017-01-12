@@ -4,20 +4,27 @@
     android:id="@+id/content_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@drawable/bg"
     tools:context="weather.budi.com.weatherapps.MainFragment"
-    tools:showIn="@layout/main_layout"
-    android:background="@android:color/black">
+    tools:showIn="@layout/main_layout">
 
-    <TextView style="@style/HomeStyle" android:id="@+id/tvCity" android:textSize="24dp" android:layout_marginTop="100dp"/>
 
-    <TextView style="@style/HomeStyle" android:id="@+id/tvWeatherInfo" android:layout_below="@id/tvCity" android:textSize="18dp"/>
+        <TextView android:id="@+id/tvCity" style="@style/HomeStyle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="50dp" android:textSize="24dp"/>
 
-    <ImageView android:layout_width="60dp" android:padding="0dp" android:adjustViewBounds="true" android:layout_height="60dp" android:id="@+id/ivIcon" android:layout_below="@id/tvWeatherInfo" android:layout_centerHorizontal="true" android:scaleType="fitXY"/>
+        <TextView android:layout_marginTop="10dp" android:id="@+id/tvWeatherInfo" style="@style/HomeStyle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_below="@id/tvCity" android:textSize="20dp"/>
 
-    <TextView style="@style/HomeStyle" android:id="@+id/tvDegree" android:layout_below="@id/ivIcon" android:textSize="80dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="100dp" android:layout_below="@id/tvWeatherInfo" android:orientation="horizontal" android:weightSum="1.0">
+
+            <RelativeLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0.5" android:layout_marginRight="2dp">
+                <ImageView  android:layout_alignParentBottom="true" android:layout_alignParentRight="true" android:id="@+id/ivIcon" android:layout_width="80dp" android:layout_height="80dp"  android:adjustViewBounds="true" android:padding="0dp" android:scaleType="fitXY"/>
+            </RelativeLayout>
+
+            <RelativeLayout android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="0.5" >
+                <TextView android:gravity="center_vertical|left"  android:id="@+id/tvDegree"  style="@style/HomeStyle" android:layout_width="match_parent" android:layout_height="match_parent"   android:textSize="70dp"  />
+            </RelativeLayout>
+        </LinearLayout>
+
+
+
 
 </RelativeLayout>
