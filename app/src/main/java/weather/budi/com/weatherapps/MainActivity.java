@@ -1,38 +1,23 @@
 package weather.budi.com.weatherapps;
 
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
-import com.google.android.gms.location.places.ui.PlaceAutocomplete;
-import com.google.android.gms.maps.model.LatLng;
+import weather.budi.com.weatherapps.fragment.DetailFragment;
+import weather.budi.com.weatherapps.fragment.ListCityFragment;
+import weather.budi.com.weatherapps.utils.Constants;
 
-import java.util.List;
+public class MainActivity extends AppCompatActivity {
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-    private GoogleApiClient mGoogleApiClient;
     private SearchView mSearchView;
     private MenuItem searchMenuItem;
 
@@ -44,23 +29,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                findPlace();
-            }
-        });
-
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(this)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-                .enableAutoManage(this, this)
-                .build();
-
+//        changePage(Constants.PAGE_DETAIL,"0","0");
+        changePage(Constants.PAGE_LIST,"");
     }
 
     private void startSearch(){
@@ -103,49 +73,39 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    public void changePage(int pageId, String... param){
+        try{
+            if(pageId == Constants.PAGE_LIST) {
+                ListCityFragment listCityFragment = new ListCityFragment();
+                setFragment(listCityFragment);
+            }else if (pageId == Constants.PAGE_DETAIL) {
+                DetailFragment detailFragment = new DetailFragment();
 
-    }
-
-    public void findPlace() {
-        try {
-            Intent intent =
-                    new PlaceAutocomplete
-                            .IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                            .build(this);
-            startActivityForResult(intent, 1);
-        } catch (GooglePlayServicesRepairableException e) {
-            // TODO: Handle the error.
-        } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO: Handle the error.
-        }
-    }
-
-    // A place has been received; use requestCode to track the request.
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == RESULT_OK) {
-                // retrive the data by using getPlace() method.
-                Place place = PlaceAutocomplete.getPlace(this, data);
-
-                LatLng latlang = place.getLatLng();
-                System.out.println("Lat: " + latlang.latitude);
-                System.out.println("Long: " + latlang.longitude);
-
-                Log.e("Tag", "Place: " + place.getName() + "," + place.getAddress() + place.getPhoneNumber());
-
-                //getLocationFromAddress(this,place.getName().toString());
-
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(this, data);
-                // TODO: Handle the error.
-                Log.e("Tag", status.getStatusMessage());
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
+                Bundle args = new Bundle();
+                args.putDouble("lat", Double.parseDouble(param[0]));
+                args.putDouble("lon", Double.parseDouble(param[1]) );
+                detailFragment.setArguments(args);
+                setFragment(detailFragment);
             }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
+
+    private void setFragment(Fragment fragment) {
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fm.beginTransaction();
+
+        fragmentTransaction.replace(R.id.container, fragment);
+
+        try {
+            fragmentTransaction.commit();
+        }catch (Exception e){
+            e.printStackTrace();
+            fragmentTransaction.commitNowAllowingStateLoss();
+        }
+    }
+
+
 }

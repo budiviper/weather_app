@@ -2,11 +2,14 @@ package weather.budi.com.weatherapps.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
 import java.text.DecimalFormat;
@@ -30,15 +42,19 @@ import weather.budi.com.weatherapps.utils.StringUtils;
 import weather.budi.com.weatherapps.utils.UrlComposer;
 import weather.budi.com.weatherapps.vo.WeatherModel;
 
-/**
- * A placeholder fragment containing a simple view.
- */
-public class MainFragment extends Fragment implements VolleyResultListener {
+import static android.app.Activity.RESULT_CANCELED;
+
+
+public class DetailFragment extends Fragment implements VolleyResultListener, GoogleApiClient.OnConnectionFailedListener {
 
     private final static int HOME = 1;
 
+    private double lat=0;
+    private double lon=0;
+
+    private GoogleApiClient mGoogleApiClient;
+
     Activity a;
-    Context ctx;
     ProgressDialog progress;
     WeatherModel weatherModel;
 
@@ -47,20 +63,36 @@ public class MainFragment extends Fragment implements VolleyResultListener {
     @Bind(R.id.tvWeatherInfo) TextView tvWeatherInfo;
     @Bind(R.id.tvDegree) TextView tvDegree;
     @Bind(R.id.ivIcon) ImageView ivIcon;
+    @Bind(R.id.fab) FloatingActionButton fab;
 
+    public DetailFragment(){
 
-    public MainFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View contentView = inflater.inflate(R.layout.fragment_main,
+        View contentView = inflater.inflate(R.layout.fragment_detail_layout,
                 container, false);
         a = getActivity();
-        ctx = getActivity();
         //a.setTitle(Constants.TITLE_HOME);
         ButterKnife.bind(this, contentView);
+
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(a)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
+//                .enableAutoManage(this, this)
+                .build();
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+                findPlace();
+            }
+        });
 
         PackageInfo pInfo = null;
         try {
@@ -72,16 +104,33 @@ public class MainFragment extends Fragment implements VolleyResultListener {
             e.printStackTrace();
         }
 
-
         progress = Popup.showProgress(getResources().getString(R.string.text_loading), a);
         progress.setCancelable(true);
 
         try {
-            getCurrentLocationWeather();
+            lat = getArguments().getDouble("lat");
+            lon = getArguments().getDouble("lon");
+
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            getCurrentLocationWeather();
         }
         return contentView;
+    }
+
+    public void findPlace() {
+        try {
+            Intent intent =
+                    new PlaceAutocomplete
+                            .IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
+                            .build(a);
+            startActivityForResult(intent, 1);
+        } catch (GooglePlayServicesRepairableException e) {
+            // TODO: Handle the error.
+        } catch (GooglePlayServicesNotAvailableException e) {
+            // TODO: Handle the error.
+        }
     }
 
     private void getCurrentLocationWeather() {
@@ -95,13 +144,19 @@ public class MainFragment extends Fragment implements VolleyResultListener {
             }
         }
 
-        String url = UrlComposer.composeCurrentWeatherByPosition(gps.getLongitude(),gps.getLatitude(),Constants.UNIT_CELCIUS);
+        String url="";
+
+        if(lat!=0 && lon!=0){
+            url = UrlComposer.composeCurrentWeatherByPosition(lon,lat,Constants.UNIT_CELCIUS);
+        }else{
+            url = UrlComposer.composeCurrentWeatherByPosition(gps.getLongitude(),gps.getLatitude(),Constants.UNIT_CELCIUS);
+        }
 
         if(true==Constants.MODE_DEV)
             System.out.println("URL:" + url);
 
         VolleySingleton.getInstance(a).
-                addRequestQue(HOME, url, a, MainFragment.class, this);
+                addRequestQue(HOME, url, a, DetailFragment.class, this);
     }
 
     private void homeResult(String result){
@@ -137,6 +192,46 @@ public class MainFragment extends Fragment implements VolleyResultListener {
                 .into(ivIcon);
     }
 
+    // A place has been received; use requestCode to track the request.
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1) {
+            if (resultCode == Activity.RESULT_OK) {
+                // retrive the data by using getPlace() method.
+                Place place = PlaceAutocomplete.getPlace(a, data);
+
+                LatLng latlang = place.getLatLng();
+
+                final double latFin = latlang.latitude;
+                final double lonFin = latlang.longitude;
+
+                if(Constants.MODE_DEV) {
+                    System.out.println("Lat: " + latFin);
+                    System.out.println("Lon: " + lonFin);
+                }
+
+
+                Log.e("Tag", "Place: " + place.getName() + "," + place.getAddress() + place.getPhoneNumber());
+
+                // DO SOMETHING HERE
+                lat = latlang.latitude;
+                lon = latlang.longitude;
+
+                getCurrentLocationWeather();
+
+
+
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(a, data);
+                // TODO: Handle the error.
+                Log.e("Tag", status.getStatusMessage());
+
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+        }
+    }
+
     @Override
     public void onSuccess(int id, String result) {
         switch (id) {
@@ -159,5 +254,10 @@ public class MainFragment extends Fragment implements VolleyResultListener {
     @Override
     public boolean onError(int id, String msg) {
         return false;
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 }

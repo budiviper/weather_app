@@ -11,6 +11,9 @@ public class Constants {
     public final static String APP_ID="7c8651deb1b33a65f059ec6acc4daa8f";
     public final static String BASE_URL_API = "http://api.openweathermap.org/";
 
+    public final static int PAGE_LIST = 0;
+    public final static int PAGE_DETAIL = 1;
+
     public final static String URL_IMG = "img/w/";
     public final static String URL_DATA = "data/2.5/";
 
