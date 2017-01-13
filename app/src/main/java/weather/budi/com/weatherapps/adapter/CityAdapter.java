@@ -7,28 +7,31 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
+import io.realm.Realm;
 import weather.budi.com.weatherapps.R;
-import weather.budi.com.weatherapps.vo.CardVO;
+import weather.budi.com.weatherapps.vo.CityVO;
 
 /**
  * Created by Budi on 1/13/2017.
  */
 
-public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+public class CityAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    List<CardVO> listVO;
+    List<CityVO> listVO;
     Activity activity;
 
     final int TYPE_CONTENT=1;
+    private Realm realm;
 
-    public CardAdapter(Activity a, List<CardVO> lvo){
+    public CityAdapter(Activity a, List<CityVO> lvo){
         activity=a;
         listVO=lvo;
     }
 
-    public void setData(List<CardVO> lvo) {
+    public void setData(List<CityVO> lvo) {
         listVO=lvo;
         notifyDataSetChanged();
     }
@@ -36,9 +39,13 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder vh, int position) {
         try {
-          if(vh instanceof CardHolder) {
-              CardHolder holder = (CardHolder) vh;
-//              holder.tvTime.setText(getItem(position).getHome_team());
+          if(vh instanceof CityHolder) {
+              CityHolder holder = (CityHolder) vh;
+
+              DecimalFormat format = new DecimalFormat("#");
+
+              holder.tvTemp.setText(""+ format.format( getItem(position).getTemp()) + (char) 0x00B0);
+              holder.tvCity.setText(getItem(position).getCityName());
           }
         }catch (Exception e){
 
@@ -47,23 +54,23 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new CardHolder(LayoutInflater.from(parent.getContext())
+        return new CityHolder(LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.row_city, parent, false));
     }
 
-    class CardHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class CityHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         TextView tvCity;
         TextView tvTime;
-        TextView tvDegree;
+        TextView tvTemp;
 
-        public CardHolder(View v) {
+        public CityHolder(View v) {
             super(v);
             // DEFINE FIND VIEW BY ID HERE
 
-            tvCity = (TextView)v.findViewById(R.id.tvCity);
+            tvCity = (TextView)v.findViewById(R.id.tvCityName);
             tvTime = (TextView)v.findViewById(R.id.tvTime);
-            tvDegree = (TextView)v.findViewById(R.id.tvDegree);
+            tvTemp = (TextView)v.findViewById(R.id.tvTemp);
 
 
             v.setOnClickListener(this);
@@ -76,7 +83,7 @@ public class CardAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         }
     }
 
-    public CardVO getItem(int position) {
+    public CityVO getItem(int position) {
         return listVO.get(position);
     }
 

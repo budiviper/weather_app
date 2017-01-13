@@ -11,6 +11,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import io.realm.Realm;
 import weather.budi.com.weatherapps.fragment.DetailFragment;
 import weather.budi.com.weatherapps.fragment.ListCityFragment;
 import weather.budi.com.weatherapps.utils.Constants;

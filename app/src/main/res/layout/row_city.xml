@@ -4,30 +4,31 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/card_view"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="100dp"
     card_view:cardCornerRadius="4dp"
     card_view:cardBackgroundColor="#556b79"
     card_view:cardElevation="5dp"
-    android:layout_margin="5dp">
+    android:layout_marginLeft="5dp"
+    android:layout_marginRight="5dp">
 
     <LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:weightSum="1.0" android:orientation="horizontal">
 
         <!-- LEFT SECTION -->
-        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"  android:weightSum="1.0" android:layout_weight="0.7" android:orientation="vertical" android:layout_marginLeft="5dp">
+        <LinearLayout android:layout_width="0dp" android:layout_height="match_parent"  android:weightSum="1.0" android:layout_weight="0.7" android:orientation="vertical" android:layout_marginLeft="10dp">
             <!-- TIME -->
-            <RelativeLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="0.5">
-                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvTime" android:gravity="left" android:textSize="14dp" android:textColor="#FFF"/>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="0.4">
+                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvTime" android:gravity="left|bottom" android:textSize="14dp" android:textColor="#FFF"/>
             </RelativeLayout>
 
             <!-- PLACE / CITY -->
-            <RelativeLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="0.5">
-                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvCityName" android:gravity="left" android:textSize="20dp" android:textColor="#FFF"/>
+            <RelativeLayout android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="0.6">
+                <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvCityName" android:gravity="left|top" android:textSize="30dp" android:textColor="#FFF"/>
             </RelativeLayout>
         </LinearLayout>
 
         <!-- RIGHT SECTION (DEGREES) -->
-        <RelativeLayout android:layout_width="0dp" android:layout_height="match_parent"  android:weightSum="1.0" android:layout_weight="0.3" android:orientation="vertical" android:layout_marginRight="5dp">
-            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvDegree" android:gravity="right" android:textSize="50dp" android:textColor="#FFF"/>
+        <RelativeLayout android:layout_width="0dp" android:layout_height="match_parent"  android:weightSum="1.0" android:layout_weight="0.3" android:orientation="vertical" android:layout_marginRight="10dp">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvTemp" android:gravity="center_vertical|right" android:textSize="60dp" android:textColor="#FFF" />
         </RelativeLayout>
     </LinearLayout>
 

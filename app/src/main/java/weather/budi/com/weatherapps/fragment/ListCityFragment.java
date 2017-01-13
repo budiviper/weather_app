@@ -2,6 +2,7 @@ package weather.budi.com.weatherapps.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -15,24 +16,32 @@ import android.view.ViewGroup;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
-import com.google.android.gms.location.places.Places;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import io.realm.Realm;
+import io.realm.RealmObject;
+import io.realm.RealmResults;
+import weather.budi.com.weatherapps.App;
 import weather.budi.com.weatherapps.R;
-import weather.budi.com.weatherapps.adapter.CardAdapter;
+import weather.budi.com.weatherapps.adapter.CityAdapter;
+import weather.budi.com.weatherapps.controller.RealmController;
+import weather.budi.com.weatherapps.gps.GPSTracker;
 import weather.budi.com.weatherapps.network.VolleyResultListener;
+import weather.budi.com.weatherapps.network.VolleySingleton;
 import weather.budi.com.weatherapps.utils.Constants;
 import weather.budi.com.weatherapps.utils.Popup;
-import weather.budi.com.weatherapps.vo.CardVO;
+import weather.budi.com.weatherapps.utils.UrlComposer;
+import weather.budi.com.weatherapps.vo.CityVO;
+import weather.budi.com.weatherapps.vo.WeatherModel;
 
 import static android.app.Activity.RESULT_CANCELED;
 
@@ -42,16 +51,20 @@ import static android.app.Activity.RESULT_CANCELED;
 
 public class ListCityFragment extends Fragment implements VolleyResultListener{
 
+    Context ctx;
     Activity a;
     ProgressDialog progress;
 
     @Bind(R.id.cardList)RecyclerView rv;
     @Bind(R.id.fabAdd)FloatingActionButton fabAdd;
 
-    private GoogleApiClient mGoogleApiClient;
-    private List<CardVO> lvo;
-    private CardAdapter cardAdapter;
+    WeatherModel weatherModel;
+    private Realm mRealm;
+    private List<CityVO> lvo;
+    private CityAdapter cityAdapter;
     private RecyclerView.LayoutManager rvLayoutManager;
+
+    private final static int SEARCH_CITY = 1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,13 +74,6 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         a=getActivity();
         ButterKnife.bind(this,contentView);
 
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(a)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-//                .enableAutoManage(this, this)
-                .build();
-
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,18 +81,29 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
             }
         });
 
-//        progress = Popup.showProgress(getResources().getString(R.string.text_loading), a);
-//        progress.setCancelable(true);
-
-        lvo = new ArrayList<CardVO>();
-        cardAdapter = new CardAdapter(a,lvo);
+        lvo = new ArrayList<CityVO>();
+        cityAdapter = new CityAdapter(a,lvo);
 
         rv.setHasFixedSize(true);
-        rv.setAdapter(cardAdapter);
+        rv.setAdapter(cityAdapter);
         rvLayoutManager = new LinearLayoutManager(a);
         rv.setLayoutManager(rvLayoutManager);
 
+        setAllCityDisplay();
+
         return contentView;
+    }
+
+    private void setAllCityDisplay(){
+        lvo=new ArrayList<CityVO>();
+
+        RealmResults<CityVO> realmResults = RealmController.with(this).getAllCity();
+
+        for(CityVO a:realmResults){
+            lvo.add(a);
+        }
+
+        cityAdapter.setData(lvo);
     }
 
     public void findPlace() {
@@ -96,6 +113,9 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                             .IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
                             .build(a);
             startActivityForResult(intent, 1);
+
+            progress = Popup.showProgress(getResources().getString(R.string.text_loading), a);
+            progress.setCancelable(true);
         } catch (GooglePlayServicesRepairableException e) {
             // TODO: Handle the error.
         } catch (GooglePlayServicesNotAvailableException e) {
@@ -105,6 +125,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        try{
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
                 // retrive the data by using getPlace() method.
@@ -112,18 +133,14 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
                 LatLng latlang = place.getLatLng();
 
-                final double latFin = latlang.latitude;
-                final double lonFin = latlang.longitude;
-
                 if(Constants.MODE_DEV) {
-                    System.out.println("Lat: " + latFin);
-                    System.out.println("Lon: " + lonFin);
+                    System.out.println("Lat: " + latlang.latitude);
+                    System.out.println("Lon: " + latlang.longitude);
                 }
-
 
                 Log.e("Tag", "Place: " + place.getName() + "," + place.getAddress() + place.getPhoneNumber());
 
-                // SAVE DATA HERE & SHOW CARD LIST
+                getLocationWeather(latlang.latitude,latlang.longitude);
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(a, data);
@@ -134,11 +151,86 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                 // The user canceled the operation.
             }
         }
+        }catch (Exception e){
+
+        }finally {
+            if(progress.isShowing())
+                progress.dismiss();
+        }
+    }
+
+    private void getLocationWeather(double lat, double lon) {
+
+        GPSTracker gps = new GPSTracker(a);
+        if(gps.canGetLocation()==true){
+            try {
+                //ToastUtils.message(a,"Coordinate: " + gps.getLatitude() + " - " + gps.getLongitude());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        String url="";
+
+        if(lat!=0 && lon!=0){
+            url = UrlComposer.composeCurrentWeatherByPosition(lon,lat,Constants.UNIT_CELCIUS);
+        }else{
+            url = UrlComposer.composeCurrentWeatherByPosition(gps.getLongitude(),gps.getLatitude(),Constants.UNIT_CELCIUS);
+        }
+
+        if(true==Constants.MODE_DEV)
+            System.out.println("URL:" + url);
+
+        VolleySingleton.getInstance(a).
+                addRequestQue(SEARCH_CITY, url, a, ListCityFragment.class, this);
+    }
+
+    private void searchResult(String result){
+
+        if(true==Constants.MODE_DEV)
+            System.out.println("JSON result: " + result);
+
+        try{
+            Gson gson = new Gson();
+            weatherModel=new WeatherModel();
+            weatherModel = gson.fromJson(result, WeatherModel.class);
+
+            CityVO dbVO = RealmController.with(this).getCityById(weatherModel.getId());
+
+            if(dbVO==null){
+
+                // ADD TO REALM DATABASE
+                mRealm = Realm.getInstance(App.getInstance());
+                mRealm.beginTransaction();
+                CityVO cityVO = mRealm.createObject(CityVO.class);
+                cityVO.setLat(weatherModel.getCoord().getLat());
+                cityVO.setLon(weatherModel.getCoord().getLon());
+                cityVO.setId(weatherModel.getId());
+                cityVO.setCityName(weatherModel.getName());
+                cityVO.setTemp(weatherModel.getMain().getTemp());
+                mRealm.commitTransaction();
+
+                lvo.add(cityVO);
+
+            }
+
+            cityAdapter.setData(lvo);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            if(progress.isShowing())
+                progress.dismiss();
+        }
     }
 
     @Override
     public void onSuccess(int id, String result) {
-
+        switch (id) {
+            case SEARCH_CITY:
+                searchResult(result);
+                break;
+        }
     }
 
     @Override
