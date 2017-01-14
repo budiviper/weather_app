@@ -6,17 +6,17 @@ package weather.budi.com.weatherapps.utils;
 
 public class UrlComposer {
 
-    public static String composeForecastByCityId(int cityId, String unit){
-        return Constants.BASE_URL_API + Constants.URL_DATA + "forecast/city?id=" + cityId + "&units=" + unit + "metric&APPID=" + Constants.APP_ID;
+    public static String composeForecastByCityName(String cityName, String unit){
+        return Constants.BASE_URL_API + Constants.URL_DATA + "forecast?q=" + cityName + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
     public static String composeCurrentWeatherByCityName(String name, String unit){
         return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?q=" + name + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
-    public static String composeTodayWeather(int cityId, String unit){
-        return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?id=" + cityId + "&units=" + unit + "&APPID=" + Constants.APP_ID;
-    }
+//    public static String composeTodayWeather(int cityId, String unit){
+//        return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?id=" + cityId + "&units=" + unit + "&APPID=" + Constants.APP_ID;
+//    }
 
     public static String composeCurrentWeatherByPosition(double lon, double lat,  String unit){
         return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?lat=" + lat + "&lon=" + lon + "&units=" + unit + "&APPID=" + Constants.APP_ID;

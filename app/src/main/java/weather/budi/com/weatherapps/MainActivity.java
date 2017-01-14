@@ -18,7 +18,7 @@ import weather.budi.com.weatherapps.utils.Constants;
 
 public class MainActivity extends AppCompatActivity {
 
-
+    int currentPage;
     private SearchView mSearchView;
     private MenuItem searchMenuItem;
 
@@ -34,9 +34,9 @@ public class MainActivity extends AppCompatActivity {
         changePage(Constants.PAGE_LIST,"");
     }
 
-    private void startSearch(){
-        startActivity(new Intent(this,GooglePlacesAutocompleteActivity.class));
-    }
+//    private void startSearch(){
+//        startActivity(new Intent(this,GooglePlacesAutocompleteActivity.class));
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -83,11 +83,12 @@ public class MainActivity extends AppCompatActivity {
                 DetailFragment detailFragment = new DetailFragment();
 
                 Bundle args = new Bundle();
-                args.putDouble("lat", Double.parseDouble(param[0]));
-                args.putDouble("lon", Double.parseDouble(param[1]) );
+                args.putString("city_name", param[0].toString());
                 detailFragment.setArguments(args);
                 setFragment(detailFragment);
             }
+
+            currentPage = pageId;
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -108,5 +109,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
 
+        if(currentPage == Constants.PAGE_LIST) {
+            super.onBackPressed();
+        }else if (currentPage == Constants.PAGE_DETAIL) {
+            changePage(Constants.PAGE_LIST);
+        }
+    }
 }

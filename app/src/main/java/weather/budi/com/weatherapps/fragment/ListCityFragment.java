@@ -100,6 +100,23 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         rvLayoutManager = new LinearLayoutManager(a);
         rv.setLayoutManager(rvLayoutManager);
 
+//        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+//                if (newState == RecyclerView.SCROLL_STATE_IDLE){
+//                    fabAdd.show();
+//                }
+//
+//                super.onScrollStateChanged(recyclerView, newState);
+//            }
+//
+//            @Override
+//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+//                if (dy > 0 ||dy<0 && fabAdd.isShown())
+//                    fabAdd.hide();
+//            }
+//        });
+
         setAllCityDisplay();
 
         return contentView;

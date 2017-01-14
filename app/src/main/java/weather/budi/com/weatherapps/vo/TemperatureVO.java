@@ -5,6 +5,12 @@ package weather.budi.com.weatherapps.vo;
  */
 
 public class TemperatureVO {
+    private double temp;
+    private double pressure;
+    private double humidity;
+    private double temp_min;
+    private double temp_max;
+
     public double getTemp() {
         return temp;
     }
@@ -46,9 +52,5 @@ public class TemperatureVO {
     }
 
 
-    private double temp;
-    private double pressure;
-    private double humidity;
-    private double temp_min;
-    private double temp_max;
+
 }

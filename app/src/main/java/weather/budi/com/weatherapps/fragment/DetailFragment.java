@@ -40,30 +40,26 @@ import weather.budi.com.weatherapps.utils.Constants;
 import weather.budi.com.weatherapps.utils.Popup;
 import weather.budi.com.weatherapps.utils.StringUtils;
 import weather.budi.com.weatherapps.utils.UrlComposer;
+import weather.budi.com.weatherapps.vo.ForecastModel;
 import weather.budi.com.weatherapps.vo.WeatherModel;
 
 import static android.app.Activity.RESULT_CANCELED;
 
 
-public class DetailFragment extends Fragment implements VolleyResultListener, GoogleApiClient.OnConnectionFailedListener {
+public class DetailFragment extends Fragment implements VolleyResultListener{
 
-    private final static int HOME = 1;
-
-    private double lat=0;
-    private double lon=0;
-
-    private GoogleApiClient mGoogleApiClient;
+    private final static int FORECAST_WEATHER = 1;
 
     Activity a;
     ProgressDialog progress;
-    WeatherModel weatherModel;
+    ForecastModel forecastModel;
 
-    @Bind(R.id.tvVersion) TextView tvVersion;
+    private String cName;
+
     @Bind(R.id.tvCity) TextView tvCity;
     @Bind(R.id.tvWeatherInfo) TextView tvWeatherInfo;
-    @Bind(R.id.tvDegree) TextView tvDegree;
+    @Bind(R.id.tvTemp) TextView tvTemp;
     @Bind(R.id.ivIcon) ImageView ivIcon;
-    @Bind(R.id.fab) FloatingActionButton fab;
 
     public DetailFragment(){
 
@@ -78,99 +74,44 @@ public class DetailFragment extends Fragment implements VolleyResultListener, Go
         //a.setTitle(Constants.TITLE_HOME);
         ButterKnife.bind(this, contentView);
 
-        mGoogleApiClient = new GoogleApiClient
-                .Builder(a)
-                .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API)
-//                .enableAutoManage(this, this)
-                .build();
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                findPlace();
-            }
-        });
-
-        PackageInfo pInfo = null;
-        try {
-            pInfo = a.getPackageManager().getPackageInfo(a.getPackageName(), 0);
-            String version = pInfo.versionName;
-            tvVersion.setText("v"+version);
-
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-
         progress = Popup.showProgress(getResources().getString(R.string.text_loading), a);
         progress.setCancelable(true);
 
         try {
-            lat = getArguments().getDouble("lat");
-            lon = getArguments().getDouble("lon");
+            cName = getArguments().getString("city_name");
+            getCurrentCityWeatherForecast(cName,Constants.UNIT_CELCIUS);
 
         } catch (Exception e) {
             e.printStackTrace();
-        }finally {
-            getCurrentLocationWeather();
         }
         return contentView;
     }
 
-    public void findPlace() {
-        try {
-            Intent intent =
-                    new PlaceAutocomplete
-                            .IntentBuilder(PlaceAutocomplete.MODE_FULLSCREEN)
-                            .build(a);
-            startActivityForResult(intent, 1);
-        } catch (GooglePlayServicesRepairableException e) {
-            // TODO: Handle the error.
-        } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO: Handle the error.
-        }
-    }
-
-    private void getCurrentLocationWeather() {
-
-        GPSTracker gps = new GPSTracker(a);
-        if(gps.canGetLocation()==true){
-            try {
-                //ToastUtils.message(a,"Coordinate: " + gps.getLatitude() + " - " + gps.getLongitude());
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
+    private void getCurrentCityWeatherForecast(String cityname, String unit) {
 
         String url="";
+        url = UrlComposer.composeForecastByCityName(cityname,unit);
 
-        if(lat!=0 && lon!=0){
-            url = UrlComposer.composeCurrentWeatherByPosition(lon,lat,Constants.UNIT_CELCIUS);
-        }else{
-            url = UrlComposer.composeCurrentWeatherByPosition(gps.getLongitude(),gps.getLatitude(),Constants.UNIT_CELCIUS);
-        }
 
         if(true==Constants.MODE_DEV)
             System.out.println("URL:" + url);
 
         VolleySingleton.getInstance(a).
-                addRequestQue(HOME, url, a, DetailFragment.class, this);
+                addRequestQue(FORECAST_WEATHER, url, a, DetailFragment.class, this);
     }
 
-    private void homeResult(String result){
+    private void forecastResult(String result){
 
         if(true==Constants.MODE_DEV)
             System.out.println("JSON result: " + result);
 
         try{
             Gson gson = new Gson();
-            weatherModel=new WeatherModel();
-            weatherModel = gson.fromJson(result, WeatherModel.class);
+            forecastModel=new ForecastModel();
+            forecastModel = gson.fromJson(result, ForecastModel.class);
 
-            if(weatherModel.getId()>0)
-                setDisplay(weatherModel);
+            if(forecastModel.getCity().getId()>0)
+                setDisplay(forecastModel);
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -179,64 +120,24 @@ public class DetailFragment extends Fragment implements VolleyResultListener, Go
         }
     }
 
-    private void setDisplay(WeatherModel weatherModel){
-        tvCity.setText(weatherModel.getName());
-        tvWeatherInfo.setText(StringUtils.toTitleCase(weatherModel.getWeather().get(0).getDescription()));
+    private void setDisplay(ForecastModel forecastModel){
+        tvCity.setText(forecastModel.getCity().getName());
+        tvWeatherInfo.setText(StringUtils.toTitleCase(forecastModel.getList().get(0).getWeather().get(0).getDescription()));
 
         DecimalFormat format = new DecimalFormat("#");
 
-        tvDegree.setText("" + format.format(weatherModel.getMain().getTemp()) + (char) 0x00B0);
+        tvTemp.setText("" + format.format(forecastModel.getList().get(0).getMain().getTemp()) + (char) 0x00B0);
 
         Glide.with(a)
-                .load(UrlComposer.composeWeatherIcon(weatherModel.getWeather().get(0).getIcon()))
+                .load(UrlComposer.composeWeatherIcon(forecastModel.getList().get(0).getWeather().get(0).getIcon()))
                 .into(ivIcon);
-    }
-
-    // A place has been received; use requestCode to track the request.
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1) {
-            if (resultCode == Activity.RESULT_OK) {
-                // retrive the data by using getPlace() method.
-                Place place = PlaceAutocomplete.getPlace(a, data);
-
-                LatLng latlang = place.getLatLng();
-
-                final double latFin = latlang.latitude;
-                final double lonFin = latlang.longitude;
-
-                if(Constants.MODE_DEV) {
-                    System.out.println("Lat: " + latFin);
-                    System.out.println("Lon: " + lonFin);
-                }
-
-
-                Log.e("Tag", "Place: " + place.getName() + "," + place.getAddress() + place.getPhoneNumber());
-
-                // DO SOMETHING HERE
-                lat = latlang.latitude;
-                lon = latlang.longitude;
-
-                getCurrentLocationWeather();
-
-
-
-            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
-                Status status = PlaceAutocomplete.getStatus(a, data);
-                // TODO: Handle the error.
-                Log.e("Tag", status.getStatusMessage());
-
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-        }
     }
 
     @Override
     public void onSuccess(int id, String result) {
         switch (id) {
-            case HOME:
-                homeResult(result);
+            case FORECAST_WEATHER:
+                forecastResult(result);
                 break;
         }
     }
@@ -254,10 +155,5 @@ public class DetailFragment extends Fragment implements VolleyResultListener, Go
     @Override
     public boolean onError(int id, String msg) {
         return false;
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 }

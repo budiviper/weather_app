@@ -11,7 +11,9 @@ import java.text.DecimalFormat;
 import java.util.List;
 
 import io.realm.Realm;
+import weather.budi.com.weatherapps.MainActivity;
 import weather.budi.com.weatherapps.R;
+import weather.budi.com.weatherapps.utils.Constants;
 import weather.budi.com.weatherapps.vo.CityVO;
 
 /**
@@ -79,8 +81,8 @@ public class CityAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         @Override
         public void onClick(View v){
-//            int mid= listVO.get(getAdapterPosition()).getMatch_id();
-//            ((MainActivity) activity).changePage(App.PAGE_FOOTBALL_RESULT_LIVE, "" +mid);
+            String cityName= listVO.get(getAdapterPosition()).getCityName();
+            ((MainActivity) activity).changePage(Constants.PAGE_DETAIL, "" +cityName);
         }
     }
 
