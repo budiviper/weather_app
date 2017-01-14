@@ -24,10 +24,15 @@ import com.google.gson.Gson;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.Format;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -43,11 +48,13 @@ import weather.budi.com.weatherapps.network.VolleyResultListener;
 import weather.budi.com.weatherapps.network.VolleySingleton;
 import weather.budi.com.weatherapps.utils.Constants;
 import weather.budi.com.weatherapps.utils.Popup;
+import weather.budi.com.weatherapps.utils.StringUtils;
 import weather.budi.com.weatherapps.utils.UrlComposer;
 import weather.budi.com.weatherapps.vo.CityVO;
 import weather.budi.com.weatherapps.vo.WeatherModel;
 
 import static android.app.Activity.RESULT_CANCELED;
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 /**
  * Created by Budi on 1/13/2017.
@@ -141,6 +148,9 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                     System.out.println("Lat: " + latlang.latitude);
                     System.out.println("Lon: " + latlang.longitude);
                     System.out.println("Place: " + place.getName());
+
+
+
                 }
 
                 final StringBuilder sb = new StringBuilder(place.getName().length());
@@ -160,9 +170,6 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         }
         }catch (Exception e){
 
-        }finally {
-            if(progress.isShowing())
-                progress.dismiss();
         }
     }
 
@@ -224,12 +231,16 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
             if(dbVO==null){
 
+                long time = weatherModel.getDt();
+                System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
+
                 // ADD TO REALM DATABASE
                 mRealm = Realm.getInstance(App.getInstance());
                 mRealm.beginTransaction();
                 CityVO cityVO = mRealm.createObject(CityVO.class);
                 cityVO.setLat(weatherModel.getCoord().getLat());
                 cityVO.setLon(weatherModel.getCoord().getLon());
+                cityVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
                 cityVO.setId(weatherModel.getId());
                 cityVO.setCityName(weatherModel.getName());
                 cityVO.setTemp(weatherModel.getMain().getTemp());

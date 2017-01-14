@@ -8,11 +8,13 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Date;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -240,5 +242,14 @@ public class StringUtils {
         }
 
         return titleCase.toString();
+    }
+
+    public static String convertEpoch(long time, String formatDate){
+        java.util.Date date = new java.util.Date(time * 1000L);
+        DateFormat format = new SimpleDateFormat(formatDate);
+        format.setTimeZone(TimeZone.getDefault());
+//        format.setTimeZone(TimeZone.getTimeZone("Etc/UTC"));
+        String formatted = format.format(date);
+        return formatted;
     }
 }

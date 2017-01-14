@@ -44,6 +44,7 @@ public class CityAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
               DecimalFormat format = new DecimalFormat("#");
 
+              holder.tvTime.setText(""+getItem(position).getTime());
               holder.tvTemp.setText(""+ format.format( getItem(position).getTemp()) + (char) 0x00B0);
               holder.tvCity.setText(getItem(position).getCityName());
           }

@@ -12,6 +12,7 @@ public class WeatherModel {
     private List<WeatherVO> weather;
     private TemperatureVO main;
     private String name;
+    private long dt;
     private int id;
 
     public CoordinateVO getCoord() {
@@ -54,9 +55,11 @@ public class WeatherModel {
         this.id = id;
     }
 
+    public long getDt() {
+        return dt;
+    }
 
-
-
-
-
+    public void setDt(long dt) {
+        this.dt = dt;
+    }
 }
