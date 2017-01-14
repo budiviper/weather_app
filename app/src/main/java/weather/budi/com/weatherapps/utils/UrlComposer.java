@@ -10,6 +10,10 @@ public class UrlComposer {
         return Constants.BASE_URL_API + Constants.URL_DATA + "forecast/city?id=" + cityId + "&units=" + unit + "metric&APPID=" + Constants.APP_ID;
     }
 
+    public static String composeCurrentWeatherByCityName(String name, String unit){
+        return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?q=" + name + "&units=" + unit + "&APPID=" + Constants.APP_ID;
+    }
+
     public static String composeTodayWeather(int cityId, String unit){
         return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?id=" + cityId + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }

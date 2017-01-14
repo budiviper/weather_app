@@ -22,6 +22,10 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.Format;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,11 +140,14 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                 if(Constants.MODE_DEV) {
                     System.out.println("Lat: " + latlang.latitude);
                     System.out.println("Lon: " + latlang.longitude);
+                    System.out.println("Place: " + place.getName());
                 }
 
-                Log.e("Tag", "Place: " + place.getName() + "," + place.getAddress() + place.getPhoneNumber());
+                final StringBuilder sb = new StringBuilder(place.getName().length());
+                sb.append(place.getName());
 
-                getLocationWeather(latlang.latitude,latlang.longitude);
+                getCityWeather(sb.toString());
+                //getLocationWeather(round(latlang.latitude),round(latlang.longitude));
 
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(a, data);
@@ -157,6 +164,24 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
             if(progress.isShowing())
                 progress.dismiss();
         }
+    }
+
+    private Double round(double toBeTruncated){
+        Double truncatedDouble = BigDecimal.valueOf(toBeTruncated)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+        return truncatedDouble;
+    }
+
+    private void getCityWeather(String cityName){
+        String url="";
+        url = UrlComposer.composeCurrentWeatherByCityName(cityName,Constants.UNIT_CELCIUS);
+
+        if(true==Constants.MODE_DEV)
+            System.out.println("URL:" + url);
+
+        VolleySingleton.getInstance(a).
+                addRequestQue(SEARCH_CITY, url, a, ListCityFragment.class, this);
     }
 
     private void getLocationWeather(double lat, double lon) {
