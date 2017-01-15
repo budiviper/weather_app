@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:id="@+id/forecastRow"
+    android:layout_height="50dp" >
+
+    <LinearLayout android:orientation="horizontal" android:weightSum="1.0" android:layout_marginLeft="10dp" android:layout_marginRight="10dp" android:layout_width="match_parent" android:layout_height="match_parent">
+
+        <RelativeLayout android:layout_weight="0.4" android:layout_width="0dp" android:layout_height="match_parent">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvDate" android:gravity="center_vertical|left" android:textColor="#FFF" android:textSize="20dp"/>
+        </RelativeLayout>
+
+        <RelativeLayout android:layout_weight="0.4" android:layout_width="0dp" android:layout_height="match_parent">
+            <ImageView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/ivIcon"/>
+        </RelativeLayout>
+
+        <RelativeLayout android:layout_weight="0.1" android:layout_width="0dp" android:layout_height="match_parent">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvTempMax" android:gravity="center_vertical|right" android:textColor="#FFF" android:textSize="20dp"/>
+        </RelativeLayout>
+
+        <RelativeLayout android:layout_weight="0.1" android:layout_width="0dp" android:layout_height="match_parent">
+            <TextView android:layout_width="match_parent" android:layout_height="match_parent" android:id="@+id/tvTempMin" android:gravity="center_vertical|right" android:textColor="#d1d1d1" android:textSize="20dp"/>
+        </RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -8,8 +8,16 @@ import java.util.List;
 
 public class ForecastListVO {
     private long dt;
-    private TemperatureVO main;
+    private TempDailyVO temp;
     private List<WeatherVO> weather;
+
+    public TempDailyVO getTemp() {
+        return temp;
+    }
+
+    public void setTemp(TempDailyVO temp) {
+        this.temp = temp;
+    }
 
     public long getDt() {
         return dt;
@@ -17,14 +25,6 @@ public class ForecastListVO {
 
     public void setDt(long dt) {
         this.dt = dt;
-    }
-
-    public TemperatureVO getMain() {
-        return main;
-    }
-
-    public void setMain(TemperatureVO main) {
-        this.main = main;
     }
 
     public List<WeatherVO> getWeather() {

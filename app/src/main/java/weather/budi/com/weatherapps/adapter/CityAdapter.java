@@ -39,6 +39,12 @@ public class CityAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
 
     @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new CityHolder(LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.row_city, parent, false));
+    }
+
+    @Override
     public void onBindViewHolder(RecyclerView.ViewHolder vh, int position) {
         try {
           if(vh instanceof CityHolder) {
@@ -53,12 +59,6 @@ public class CityAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         }catch (Exception e){
 
         }
-    }
-
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        return new CityHolder(LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.row_city, parent, false));
     }
 
     class CityHolder extends RecyclerView.ViewHolder implements View.OnClickListener{

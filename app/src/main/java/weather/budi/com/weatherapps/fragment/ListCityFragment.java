@@ -85,6 +85,9 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         a=getActivity();
         ButterKnife.bind(this,contentView);
 
+        progress = Popup.showProgress(getResources().getString(R.string.text_loading), a);
+        progress.setCancelable(true);
+
         fabAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -123,15 +126,22 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
     }
 
     private void setAllCityDisplay(){
-        lvo=new ArrayList<CityVO>();
+        try{
+            lvo=new ArrayList<CityVO>();
 
-        RealmResults<CityVO> realmResults = RealmController.with(this).getAllCity();
+            RealmResults<CityVO> realmResults = RealmController.with(this).getAllCity();
 
-        for(CityVO a:realmResults){
-            lvo.add(a);
+            for(CityVO a:realmResults){
+                lvo.add(a);
+            }
+
+            cityAdapter.setData(lvo);
+        }catch(Exception e){
+
+        }finally {
+            if(progress.isShowing())
+                progress.dismiss();
         }
-
-        cityAdapter.setData(lvo);
     }
 
     public void findPlace() {
@@ -142,8 +152,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                             .build(a);
             startActivityForResult(intent, 1);
 
-            progress = Popup.showProgress(getResources().getString(R.string.text_loading), a);
-            progress.setCancelable(true);
+
         } catch (GooglePlayServicesRepairableException e) {
             // TODO: Handle the error.
         } catch (GooglePlayServicesNotAvailableException e) {
@@ -156,6 +165,10 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         try{
         if (requestCode == 1) {
             if (resultCode == Activity.RESULT_OK) {
+
+                if(!progress.isShowing())
+                    progress.show();
+
                 // retrive the data by using getPlace() method.
                 Place place = PlaceAutocomplete.getPlace(a, data);
 
@@ -165,9 +178,6 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                     System.out.println("Lat: " + latlang.latitude);
                     System.out.println("Lon: " + latlang.longitude);
                     System.out.println("Place: " + place.getName());
-
-
-
                 }
 
                 final StringBuilder sb = new StringBuilder(place.getName().length());
@@ -190,12 +200,12 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         }
     }
 
-    private Double round(double toBeTruncated){
-        Double truncatedDouble = BigDecimal.valueOf(toBeTruncated)
-                .setScale(2, RoundingMode.HALF_UP)
-                .doubleValue();
-        return truncatedDouble;
-    }
+//    private Double round(double toBeTruncated){
+//        Double truncatedDouble = BigDecimal.valueOf(toBeTruncated)
+//                .setScale(2, RoundingMode.HALF_UP)
+//                .doubleValue();
+//        return truncatedDouble;
+//    }
 
     private void getCityWeather(String cityName){
         String url="";
