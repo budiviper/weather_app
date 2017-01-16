@@ -58,6 +58,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
     @Bind(R.id.fabAdd)FloatingActionButton fabAdd;
 
     WeatherModel weatherModel;
+
     private Realm mRealm;
     private List<CityVO> lvo;
     private CityAdapter cityAdapter;
@@ -103,12 +104,18 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
             RealmResults<CityVO> realmResults = RealmController.with(this).getAllCity();
 
-            if(realmResults.size()>0)
-                for(CityVO a:realmResults){
+            StringBuilder sb = new StringBuilder();
+
+            if(realmResults.size()>0) {
+                for (CityVO a : realmResults) {
                     //lvo.add(a);
-                    getCityTime(a.getCityName());
+//                    getCityTime(a.getCityName());
+
+                    sb.append(a.getId() + ",");
                 }
-            else
+
+                getGroupCityTime(sb.toString());
+            }else
                 if(progress.isShowing())
                     progress.dismiss();
         }catch(Exception e){
@@ -116,12 +123,10 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         }
     }
 
-    private void getCityTime(String cityName){
+    private void getGroupCityTime(String cityGroupId){
         String url="";
-        url = UrlComposer.composeCurrentWeatherByCityName(cityName,Constants.UNIT_CELCIUS);
 
-        if(true==Constants.MODE_DEV)
-            System.out.println("URL:" + url);
+        url = UrlComposer.composeWeatherByGroupCityId(cityGroupId,Constants.UNIT_CELCIUS);
 
         VolleySingleton.getInstance(a).
                 addRequestQue(SEARCH_CITY_TIME, url, a, ListCityFragment.class, this);
@@ -242,35 +247,38 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
             weatherModel=new WeatherModel();
             weatherModel = gson.fromJson(result, WeatherModel.class);
 
-            CityVO dbVO = RealmController.with(this).getCityById(weatherModel.getId());
+            for(WeatherModel wm:weatherModel.getList()){
+                CityVO dbVO = RealmController.with(this).getCityById(wm.getId());
 
-            long time = weatherModel.getDt();
+                long time = wm.getDt();
 
-            if(true==Constants.MODE_DEV)
-                System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
+                if(true==Constants.MODE_DEV)
+                    System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
 
-            mRealm = Realm.getInstance(App.getInstance());
-            mRealm.beginTransaction();
+                mRealm = Realm.getInstance(App.getInstance());
+                mRealm.beginTransaction();
 
-            if(dbVO==null){
-                // ADD TO REALM DB
+                if(dbVO==null){
+                    // ADD TO REALM DB
 
-                CityVO cityVO = mRealm.createObject(CityVO.class);
-                cityVO.setLat(weatherModel.getCoord().getLat());
-                cityVO.setLon(weatherModel.getCoord().getLon());
-                cityVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
-                cityVO.setId(weatherModel.getId());
-                cityVO.setCityName(weatherModel.getName());
-                cityVO.setTemp(weatherModel.getMain().getTemp());
-                lvo.add(cityVO);
-            }else{
-                // UPDATE REALM DB
+                    CityVO cityVO = mRealm.createObject(CityVO.class);
+                    cityVO.setLat(wm.getCoord().getLat());
+                    cityVO.setLon(wm.getCoord().getLon());
+                    cityVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
+                    cityVO.setId(wm.getId());
+                    cityVO.setCityName(wm.getName());
+                    cityVO.setTemp(wm.getMain().getTemp());
+                    lvo.add(cityVO);
+                }else{
+                    // UPDATE REALM DB
 
-                dbVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
-                lvo.add(dbVO);
+                    dbVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
+                    lvo.add(dbVO);
+                }
+
+                mRealm.commitTransaction();
             }
 
-            mRealm.commitTransaction();
         }catch (Exception e){
             e.printStackTrace();
         }finally {

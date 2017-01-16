@@ -15,6 +15,17 @@ public class WeatherModel {
     private long dt;
     private int id;
 
+    private List<WeatherModel> list;
+
+
+    public List<WeatherModel> getList() {
+        return list;
+    }
+
+    public void setList(List<WeatherModel> list) {
+        this.list = list;
+    }
+
     public CoordinateVO getCoord() {
         return coord;
     }

@@ -6,23 +6,20 @@ package weather.budi.com.weatherapps.utils;
 
 public class UrlComposer {
 
-    public static String composeForecastByCityName(String cityName, String unit){
-        return Constants.BASE_URL_API + Constants.URL_DATA + "forecast?q=" + StringUtils.urlEncode(cityName) + "&units=" + unit + "&APPID=" + Constants.APP_ID;
-    }
-
     public static String composeCurrentWeatherByCityName(String cityName, String unit){
         return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?q=" + StringUtils.urlEncode(cityName) + "&units=" + unit + "&APPID=" + Constants.APP_ID;
+    }
+
+    public static String composeWeatherByGroupCityId(String groupCityId, String unit){
+        return Constants.BASE_URL_API + Constants.URL_DATA  + "group?id=" + StringUtils.urlEncode(groupCityId) + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
     public static String composeForecastDaily(String cityName, int totalDay, String unit){
         return Constants.BASE_URL_API + Constants.URL_DATA  + "forecast/daily?q=" + StringUtils.urlEncode(cityName) + "&cnt=" + totalDay + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
-    public static String composeCurrentWeatherByPosition(double lon, double lat,  String unit){
-        return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?lat=" + lat + "&lon=" + lon + "&units=" + unit + "&APPID=" + Constants.APP_ID;
-    }
-
     public static String composeWeatherIcon(String icon){
         return Constants.BASE_URL_API + Constants.URL_IMG + icon + ".png";
     }
+
 }
