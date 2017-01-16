@@ -106,6 +106,10 @@ public class VolleySingleton {
     public void addRequestQue(final int id, final String url, final Context ctx, Object tag, final VolleyResultListener listener) {
         listener.onStart(id);
 
+        if(true==Constants.MODE_DEV)
+            System.out.println("URL:" + url);
+
+
         try {
             StringCookieRequest reqQueue = Constants.currentRequestString = new StringCookieRequest(Request.Method.GET, url,
                     new Response.Listener<String>() {

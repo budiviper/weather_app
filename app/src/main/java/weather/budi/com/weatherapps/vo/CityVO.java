@@ -1,6 +1,7 @@
 package weather.budi.com.weatherapps.vo;
 
 import io.realm.RealmObject;
+import io.realm.annotations.Ignore;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -10,7 +11,9 @@ import io.realm.annotations.PrimaryKey;
 public class CityVO extends RealmObject{
 
     // DISPLAY ONLY
+    @Ignore
     private String time;
+
     private String cityName;
 
     // PARAMETER PURPOSE (OPEN WEATHER)

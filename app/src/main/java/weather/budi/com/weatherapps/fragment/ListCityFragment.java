@@ -22,28 +22,17 @@ import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import io.realm.Realm;
-import io.realm.RealmObject;
 import io.realm.RealmResults;
 import weather.budi.com.weatherapps.App;
 import weather.budi.com.weatherapps.R;
 import weather.budi.com.weatherapps.adapter.CityAdapter;
 import weather.budi.com.weatherapps.controller.RealmController;
-import weather.budi.com.weatherapps.gps.GPSTracker;
 import weather.budi.com.weatherapps.network.VolleyResultListener;
 import weather.budi.com.weatherapps.network.VolleySingleton;
 import weather.budi.com.weatherapps.utils.Constants;
@@ -54,7 +43,6 @@ import weather.budi.com.weatherapps.vo.CityVO;
 import weather.budi.com.weatherapps.vo.WeatherModel;
 
 import static android.app.Activity.RESULT_CANCELED;
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 /**
  * Created by Budi on 1/13/2017.
@@ -76,6 +64,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
     private RecyclerView.LayoutManager rvLayoutManager;
 
     private final static int SEARCH_CITY = 1;
+    private final static int SEARCH_CITY_TIME = 2;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -103,23 +92,6 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         rvLayoutManager = new LinearLayoutManager(a);
         rv.setLayoutManager(rvLayoutManager);
 
-//        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-//                if (newState == RecyclerView.SCROLL_STATE_IDLE){
-//                    fabAdd.show();
-//                }
-//
-//                super.onScrollStateChanged(recyclerView, newState);
-//            }
-//
-//            @Override
-//            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-//                if (dy > 0 ||dy<0 && fabAdd.isShown())
-//                    fabAdd.hide();
-//            }
-//        });
-
         setAllCityDisplay();
 
         return contentView;
@@ -131,17 +103,28 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
             RealmResults<CityVO> realmResults = RealmController.with(this).getAllCity();
 
-            for(CityVO a:realmResults){
-                lvo.add(a);
-            }
-
-            cityAdapter.setData(lvo);
+            if(realmResults.size()>0)
+                for(CityVO a:realmResults){
+                    //lvo.add(a);
+                    getCityTime(a.getCityName());
+                }
+            else
+                if(progress.isShowing())
+                    progress.dismiss();
         }catch(Exception e){
 
-        }finally {
-            if(progress.isShowing())
-                progress.dismiss();
         }
+    }
+
+    private void getCityTime(String cityName){
+        String url="";
+        url = UrlComposer.composeCurrentWeatherByCityName(cityName,Constants.UNIT_CELCIUS);
+
+        if(true==Constants.MODE_DEV)
+            System.out.println("URL:" + url);
+
+        VolleySingleton.getInstance(a).
+                addRequestQue(SEARCH_CITY_TIME, url, a, ListCityFragment.class, this);
     }
 
     public void findPlace() {
@@ -200,45 +183,9 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         }
     }
 
-//    private Double round(double toBeTruncated){
-//        Double truncatedDouble = BigDecimal.valueOf(toBeTruncated)
-//                .setScale(2, RoundingMode.HALF_UP)
-//                .doubleValue();
-//        return truncatedDouble;
-//    }
-
     private void getCityWeather(String cityName){
         String url="";
         url = UrlComposer.composeCurrentWeatherByCityName(cityName,Constants.UNIT_CELCIUS);
-
-        if(true==Constants.MODE_DEV)
-            System.out.println("URL:" + url);
-
-        VolleySingleton.getInstance(a).
-                addRequestQue(SEARCH_CITY, url, a, ListCityFragment.class, this);
-    }
-
-    private void getLocationWeather(double lat, double lon) {
-
-        GPSTracker gps = new GPSTracker(a);
-        if(gps.canGetLocation()==true){
-            try {
-                //ToastUtils.message(a,"Coordinate: " + gps.getLatitude() + " - " + gps.getLongitude());
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-
-        String url="";
-
-        if(lat!=0 && lon!=0){
-            url = UrlComposer.composeCurrentWeatherByPosition(lon,lat,Constants.UNIT_CELCIUS);
-        }else{
-            url = UrlComposer.composeCurrentWeatherByPosition(gps.getLongitude(),gps.getLatitude(),Constants.UNIT_CELCIUS);
-        }
-
-        if(true==Constants.MODE_DEV)
-            System.out.println("URL:" + url);
 
         VolleySingleton.getInstance(a).
                 addRequestQue(SEARCH_CITY, url, a, ListCityFragment.class, this);
@@ -259,7 +206,9 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
             if(dbVO==null){
 
                 long time = weatherModel.getDt();
-                System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
+
+                if(true==Constants.MODE_DEV)
+                    System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
 
                 // ADD TO REALM DATABASE
                 mRealm = Realm.getInstance(App.getInstance());
@@ -287,11 +236,59 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
         }
     }
 
+    private void cityTimeResult(String result){
+        try{
+            Gson gson = new Gson();
+            weatherModel=new WeatherModel();
+            weatherModel = gson.fromJson(result, WeatherModel.class);
+
+            CityVO dbVO = RealmController.with(this).getCityById(weatherModel.getId());
+
+            long time = weatherModel.getDt();
+
+            if(true==Constants.MODE_DEV)
+                System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
+
+            mRealm = Realm.getInstance(App.getInstance());
+            mRealm.beginTransaction();
+
+            if(dbVO==null){
+                // ADD TO REALM DB
+
+                CityVO cityVO = mRealm.createObject(CityVO.class);
+                cityVO.setLat(weatherModel.getCoord().getLat());
+                cityVO.setLon(weatherModel.getCoord().getLon());
+                cityVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
+                cityVO.setId(weatherModel.getId());
+                cityVO.setCityName(weatherModel.getName());
+                cityVO.setTemp(weatherModel.getMain().getTemp());
+                lvo.add(cityVO);
+            }else{
+                // UPDATE REALM DB
+
+                dbVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
+                lvo.add(dbVO);
+            }
+
+            mRealm.commitTransaction();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            cityAdapter.setData(lvo);
+
+            if(progress.isShowing())
+                progress.dismiss();
+        }
+    }
+
     @Override
     public void onSuccess(int id, String result) {
         switch (id) {
             case SEARCH_CITY:
                 searchResult(result);
+                break;
+            case SEARCH_CITY_TIME:
+                cityTimeResult(result);
                 break;
         }
     }

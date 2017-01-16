@@ -7,15 +7,15 @@ package weather.budi.com.weatherapps.utils;
 public class UrlComposer {
 
     public static String composeForecastByCityName(String cityName, String unit){
-        return Constants.BASE_URL_API + Constants.URL_DATA + "forecast?q=" + cityName + "&units=" + unit + "&APPID=" + Constants.APP_ID;
+        return Constants.BASE_URL_API + Constants.URL_DATA + "forecast?q=" + StringUtils.urlEncode(cityName) + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
-    public static String composeCurrentWeatherByCityName(String name, String unit){
-        return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?q=" + name + "&units=" + unit + "&APPID=" + Constants.APP_ID;
+    public static String composeCurrentWeatherByCityName(String cityName, String unit){
+        return Constants.BASE_URL_API + Constants.URL_DATA  + "weather?q=" + StringUtils.urlEncode(cityName) + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
     public static String composeForecastDaily(String cityName, int totalDay, String unit){
-        return Constants.BASE_URL_API + Constants.URL_DATA  + "forecast/daily?q=" + cityName + "&cnt=" + totalDay + "&units=" + unit + "&APPID=" + Constants.APP_ID;
+        return Constants.BASE_URL_API + Constants.URL_DATA  + "forecast/daily?q=" + StringUtils.urlEncode(cityName) + "&cnt=" + totalDay + "&units=" + unit + "&APPID=" + Constants.APP_ID;
     }
 
     public static String composeCurrentWeatherByPosition(double lon, double lat,  String unit){
