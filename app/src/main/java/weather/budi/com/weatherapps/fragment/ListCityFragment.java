@@ -198,7 +198,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
     private void searchResult(String result){
 
-        if(true==Constants.MODE_DEV)
+        if(Constants.MODE_DEV)
             System.out.println("JSON result: " + result);
 
         try{
@@ -212,7 +212,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
                 long time = weatherModel.getDt();
 
-                if(true==Constants.MODE_DEV)
+                if(Constants.MODE_DEV)
                     System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
 
                 // ADD TO REALM DATABASE
@@ -222,6 +222,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                 cityVO.setLat(weatherModel.getCoord().getLat());
                 cityVO.setLon(weatherModel.getCoord().getLon());
                 cityVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
+                cityVO.setWeather_id(weatherModel.getWeather().get(0).getId());
                 cityVO.setId(weatherModel.getId());
                 cityVO.setCityName(weatherModel.getName());
                 cityVO.setTemp(weatherModel.getMain().getTemp());
@@ -252,7 +253,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
 
                 long time = wm.getDt();
 
-                if(true==Constants.MODE_DEV)
+                if(Constants.MODE_DEV)
                     System.out.println("WAKTU: " + StringUtils.convertEpoch(time,"hh:mm a"));
 
                 mRealm = Realm.getInstance(App.getInstance());
@@ -265,6 +266,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                     cityVO.setLat(wm.getCoord().getLat());
                     cityVO.setLon(wm.getCoord().getLon());
                     cityVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
+                    cityVO.setWeather_id(wm.getWeather().get(0).getId());
                     cityVO.setId(wm.getId());
                     cityVO.setCityName(wm.getName());
                     cityVO.setTemp(wm.getMain().getTemp());
@@ -272,6 +274,7 @@ public class ListCityFragment extends Fragment implements VolleyResultListener{
                 }else{
                     // UPDATE REALM DB
 
+                    dbVO.setWeather_id(wm.getWeather().get(0).getId());
                     dbVO.setTime(StringUtils.convertEpoch(time,"hh:mm a"));
                     lvo.add(dbVO);
                 }

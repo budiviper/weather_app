@@ -14,6 +14,9 @@ public class CityVO extends RealmObject{
     @Ignore
     private String time;
 
+    @Ignore
+    private int weather_id;
+
     private String cityName;
 
     // PARAMETER PURPOSE (OPEN WEATHER)
@@ -27,8 +30,19 @@ public class CityVO extends RealmObject{
     private String main;
     private String description;
 
+
+
     // PARAMETER & DISPLAY
     private double temp;
+
+
+    public int getWeather_id() {
+        return weather_id;
+    }
+
+    public void setWeather_id(int weather_id) {
+        this.weather_id = weather_id;
+    }
 
     public String getTime() {
         return time;

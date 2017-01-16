@@ -12,15 +12,18 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import io.realm.Realm;
+import io.realm.RealmResults;
 import weather.budi.com.weatherapps.fragment.DetailFragment;
 import weather.budi.com.weatherapps.fragment.ListCityFragment;
 import weather.budi.com.weatherapps.utils.Constants;
+import weather.budi.com.weatherapps.vo.CityVO;
 
 public class MainActivity extends AppCompatActivity {
 
     int currentPage;
     private SearchView mSearchView;
-    private MenuItem searchMenuItem;
+    private MenuItem deleteMenuItem;
+    private Realm mRealm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,22 +33,15 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        changePage(Constants.PAGE_DETAIL,"0","0");
         changePage(Constants.PAGE_LIST,"");
     }
-
-//    private void startSearch(){
-//        startActivity(new Intent(this,GooglePlacesAutocompleteActivity.class));
-//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        searchMenuItem = menu.findItem(R.id.action_search);
-        mSearchView = (SearchView) searchMenuItem.getActionView();
-        mSearchView.setOnQueryTextListener(listener);
+        deleteMenuItem = menu.findItem(R.id.action_delete);
         return true;
     }
 
@@ -65,13 +61,32 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        if (id == R.id.action_delete) {
+            deleteAllSavedLocation();
+            return true;
+        }
 
         //noinspection SimplifiableIfStatement
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteAllSavedLocation(){
+
+        mRealm = Realm.getInstance(App.getInstance());
+
+        RealmResults<CityVO> results = mRealm.where(CityVO.class).findAll();
+
+        // All changes to data must happen in a transaction
+        mRealm.beginTransaction();
+
+        // Delete all matches
+        results.clear();
+
+        mRealm.commitTransaction();
+
+        changePage(Constants.PAGE_LIST,"");
     }
 
     public void changePage(int pageId, String... param){

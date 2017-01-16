@@ -95,9 +95,6 @@ public class DetailFragment extends Fragment implements VolleyResultListener{
         String url="";
         url = UrlComposer.composeCurrentWeatherByCityName(cityname,unit);
 
-        if(true==Constants.MODE_DEV)
-            System.out.println("URL:" + url);
-
         VolleySingleton.getInstance(a).
                 addRequestQue(HEADER_WEATHER, url, a, DetailFragment.class, this);
     }
@@ -106,16 +103,13 @@ public class DetailFragment extends Fragment implements VolleyResultListener{
         String url="";
         url = UrlComposer.composeForecastDaily(cityname,totalDay,Constants.UNIT_CELCIUS);
 
-        if(true==Constants.MODE_DEV)
-            System.out.println("URL:" + url);
-
         VolleySingleton.getInstance(a).
                 addRequestQue(FORECAST_WEATHER, url, a, DetailFragment.class, this);
     }
 
     private void headerResult(String result){
 
-        if(true==Constants.MODE_DEV)
+        if(Constants.MODE_DEV)
             System.out.println("JSON result: " + result);
 
         try{
@@ -136,7 +130,7 @@ public class DetailFragment extends Fragment implements VolleyResultListener{
 
     private void forecastResult(String result){
 
-        if(true==Constants.MODE_DEV)
+        if(Constants.MODE_DEV)
             System.out.println("JSON result: " + result);
 
         try{
